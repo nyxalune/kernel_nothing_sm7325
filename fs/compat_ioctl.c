@@ -193,8 +193,23 @@ COMPAT_SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd,
 #else
 	case FS_IOC_RESVSP:
 	case FS_IOC_RESVSP64:
-		goto found_handler;
+		error = ioctl_preallocate(f.file, compat_ptr(arg));
+		goto out_fput;
 #endif
+
+	case FICLONE:
+		goto do_ioctl;
+	case FICLONERANGE:
+	case FIDEDUPERANGE:
+	case FS_IOC_FIEMAP:
+	case FIGETBSZ:
+		goto found_handler;
+
+	case FIBMAP:
+	case FIONREAD:
+		if (S_ISREG(file_inode(f.file)->i_mode))
+			break;
+		/*FALL THROUGH*/
 
 	default:
 		if (f.file->f_op->compat_ioctl) {
