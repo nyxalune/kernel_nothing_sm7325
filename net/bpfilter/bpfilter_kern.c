@@ -38,8 +38,7 @@ static int bpfilter_send_req(struct mbox_request *req)
 	ssize_t n;
 
 	if (!bpfilter_ops.info.tgid)
-		return -EFAULT;
-	pos = 0;
+		goto out;
 	n = kernel_write(bpfilter_ops.info.pipe_to_umh, req, sizeof(*req),
 			   &pos);
 	if (n != sizeof(*req)) {
