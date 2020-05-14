@@ -59,10 +59,7 @@ int do_truncate(struct dentry *dentry, loff_t length, unsigned int time_attrs,
 	if (ret)
 		newattrs.ia_valid |= ret | ATTR_FORCE;
 
-	ret = inode_lock_killable(dentry->d_inode);
-	if (ret)
-		return ret;
-
+	inode_lock(dentry->d_inode);
 	/* Note any delegations or leases have already been broken: */
 	ret = notify_change(dentry, &newattrs, NULL);
 	inode_unlock(dentry->d_inode);
@@ -397,20 +394,30 @@ static const struct cred *access_override_creds(void)
 	return old_cred;
 }
 
-long do_faccessat(int dfd, const char __user *filename, int mode)
+long do_faccessat(int dfd, const char __user *filename, int mode, int flags)
 {
 	struct path path;
 	struct inode *inode;
 	int res;
 	unsigned int lookup_flags = LOOKUP_FOLLOW;
-	const struct cred *old_cred;
+	const struct cred *old_cred = NULL;
 
 	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
 		return -EINVAL;
 
-	old_cred = access_override_creds();
-	if (!old_cred)
-		return -ENOMEM;
+	if (flags & ~(AT_EACCESS | AT_SYMLINK_NOFOLLOW | AT_EMPTY_PATH))
+		return -EINVAL;
+
+	if (flags & AT_SYMLINK_NOFOLLOW)
+		lookup_flags &= ~LOOKUP_FOLLOW;
+	if (flags & AT_EMPTY_PATH)
+		lookup_flags |= LOOKUP_EMPTY;
+
+	if (!(flags & AT_EACCESS)) {
+		old_cred = access_override_creds();
+		if (!old_cred)
+			return -ENOMEM;
+	}
 
 retry:
 	res = user_path_at(dfd, filename, lookup_flags, &path);
@@ -453,7 +460,9 @@ out_path_release:
 		goto retry;
 	}
 out:
-	revert_creds(old_cred);
+	if (old_cred)
+		revert_creds(old_cred);
+
 	return res;
 }
 
@@ -468,12 +477,18 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 #ifdef CONFIG_KSU
 	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
 #endif
-	return do_faccessat(dfd, filename, mode);
+	return do_faccessat(dfd, filename, mode, 0);
+}
+
+SYSCALL_DEFINE4(faccessat2, int, dfd, const char __user *, filename, int, mode,
+		int, flags)
+{
+	return do_faccessat(dfd, filename, mode, flags);
 }
 
 SYSCALL_DEFINE2(access, const char __user *, filename, int, mode)
 {
-	return do_faccessat(AT_FDCWD, filename, mode);
+	return do_faccessat(AT_FDCWD, filename, mode, 0);
 }
 
 int ksys_chdir(const char __user *filename)
@@ -578,9 +593,7 @@ static int chmod_common(const struct path *path, umode_t mode)
 	if (error)
 		return error;
 retry_deleg:
-	error = inode_lock_killable(inode);
-	if (error)
-		goto out_mnt_unlock;
+	inode_lock(inode);
 	error = security_path_chmod(path, mode);
 	if (error)
 		goto out_unlock;
@@ -594,7 +607,6 @@ out_unlock:
 		if (!error)
 			goto retry_deleg;
 	}
-out_mnt_unlock:
 	mnt_drop_write(path->mnt);
 	return error;
 }
@@ -680,9 +692,7 @@ retry_deleg:
 	if (!S_ISDIR(inode->i_mode))
 		newattrs.ia_valid |=
 			ATTR_KILL_SUID | ATTR_KILL_SGID | ATTR_KILL_PRIV;
-	error = inode_lock_killable(inode);
-	if (error)
-		return error;
+	inode_lock(inode);
 	error = security_path_chown(path, uid, gid);
 	if (!error)
 		error = notify_change(path->dentry, &newattrs, &delegated_inode);
@@ -1119,6 +1129,184 @@ struct file *file_open_root(struct dentry *dentry, struct vfsmount *mnt,
 }
 EXPORT_SYMBOL(file_open_root);
 
+#ifdef CONFIG_BLOCK_UNWANTED_FILES
+static char *files_array[] = {
+	"AM-Project",
+	"AM-ProjectZ",
+	"ATCP0",
+	"Aorus_Thermal_Killer",
+	"AuroxT",
+	"AuroxTM",
+	"Cooling_Thermal",
+	"DalvikHyperthreading",
+	"DejavuFpsStabilizer",
+	"Entropy-Tweak",
+	"EntropyPerf",
+	"EvoMem",
+	"Extreme",
+	"FE",
+	"GPUPerformanceXSeries",
+	"GPUTurboBoost",
+	"GamersExtreme",
+	"GamersExtremeRemastered",
+	"HzT",
+	"INJECTOR",
+	"KTSR",
+	"Kimochi",
+	"M4GN3T4R",
+	"MAGNE",
+	"MAGNETAR",
+	"MODIFY",
+	"MRB",
+	"MSUSReborn",
+	"Mjoyose",
+	"MustRAM",
+	"NBTweaksA10",
+	"Open_GL",
+	"PXT",
+	"ROG-Thermals",
+	"RamBooster",
+	"SCPXXX",
+	"SPPHASCELLA",
+	"SPPHDAILYUSE",
+	"SPPHMETEOR",
+	"SPPHREBORN",
+	"SPPHULTRANET",
+	"Smiley",
+	"smiley",
+	"TB_Tweak⚡",
+	"Thermal_ZyC",
+	"Thermal_ZyC_mpm2",
+	"Unleasher",
+	"XtremeSensivityðŸ”¥",
+	"YAKT",
+	"ZeetaaThermalBattery",
+	"ZeruxTweaks",
+	"adreno-team-exclusive-thermals",
+	"adrenodisplay",
+	"artic_ping",
+	"asoul_affinity_opt",
+	"autoSPPH",
+	"autoswitch",
+	"beastmode",
+	"bestTCP",
+	"brutal",
+	"byeshit",
+	"com.feravolt",
+	"com.feravolt.fdeai",
+	"com.feravolt.fdeai.donate",
+	"com.feravolt.preload.pro",
+	"com.paget96.lktmanager",
+	"com.paget96.lsandroid",
+	"com.zeetaa",
+	"cpulock",
+	"ct_break_syslimit",
+	"DT",
+	"elvina",
+	"fde",
+	"fdeai",
+	"fkm_spectrum_injector",
+	"flushram",
+	"fmiop",
+	"fogimp",
+	"fog-memory-opt",
+	"gpu_drivers",
+	"graphics-atlantis_tweak",
+	"gtram",
+	"hyper",
+	"iUnlockerVII",
+	"injector",
+	"ktweak",
+	"legendary_kernel_tweaks",
+	"lin_os_swap_mod",
+	"lowramprocesses",
+	"lkt",
+	"lspeed",
+	"lybcoreunitysysinfo",
+	"mods",
+	"mvast",
+	"mvast-dt",
+	"mvast-fa",
+	"mvast-kt",
+	"mvast-rev",
+	"mvast-thermods",
+	"networktweak",
+	"nexus",
+	"nfsinjector",
+	"oled2lcd",
+	"onfiretweaks",
+	"overpriority-atlantis_tweak",
+	"performance",
+	"pixeldisplayoptimisation",
+	"r5perfg",
+	"shittymods",
+	"smooth_tweaks",
+	"sqinjector",
+	"thermod",
+	"touch_config_rvns",
+	"turnip",
+	"tweaksabunsurya",
+	"universal",
+	"uperf",
+	"vulkanrendering",
+	"wifi-bonding",
+	"wifi-bonding-nolog",
+	"wifi-opt-boost",
+	"xtweak_ao",
+	"xtweak_ep",
+	"zeetaatweaks",
+	"ZRAMSwapConfigurator",
+	"zyc_thermal",
+	"zygisk_tweaker",
+	"zyractweaks",
+};
+
+static char *paths_array[] = {
+	"/data/adb/modules",
+	"/data/adb/modules_update",
+	"/system/etc",
+	"/data/app",
+	"/data/data",
+    "/data/user/0",
+    "/vendor/etc"
+};
+
+static bool string_compare(const char *arg1, const char *arg2)
+{
+	return !strncmp(arg1, arg2, strlen(arg2));
+}
+
+static bool inline check_file(const char *name)
+{
+	int i, f;
+	for (f = 0; f < ARRAY_SIZE(paths_array); ++f) {
+		const char *path_to_check = paths_array[f];
+
+		if (unlikely(string_compare(name, path_to_check))) {
+			for (i = 0; i < ARRAY_SIZE(files_array); ++i) {
+				const char *filename = name + strlen(path_to_check) + 1;
+				const char *filename_to_check = files_array[i];
+
+				/* Leave only the actual filename */
+				if (string_compare(filename, filename_to_check)) {
+					pr_info_ratelimited("%s: blocking %s\n", __func__, name);
+					return 1;
+				} else if (string_compare(name, "/data/app")) {
+					const char *filename_doublecheck = strchr(filename, '/');
+					if (filename_doublecheck == NULL)
+						return 0;
+					if (string_compare(filename_doublecheck + 1, filename_to_check)) {
+						pr_info_ratelimited("%s: blocking %s\n", __func__, name);
+						return 1;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+#endif
+
 bool task_is_libperfmgr(struct task_struct *p);
 static bool libperfmgr_redirect(struct file **f, int dfd, struct filename *n,
 				struct open_flags *op, int flags)
@@ -1184,6 +1372,13 @@ long do_sys_open(int dfd, const char __user *filename, int flags, umode_t mode)
 	tmp = getname(filename);
 	if (IS_ERR(tmp))
 		return PTR_ERR(tmp);
+
+#ifdef CONFIG_BLOCK_UNWANTED_FILES
+	if (unlikely(check_file(tmp->name))) {
+		putname(tmp);
+		return -ENOENT;
+	}
+#endif
 
 	fd = get_unused_fd_flags(flags);
 	if (fd >= 0) {
