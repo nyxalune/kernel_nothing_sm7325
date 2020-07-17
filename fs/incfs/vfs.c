@@ -473,6 +473,9 @@ static ssize_t pending_reads_read(struct file *f, char __user *buf, size_t len,
 	if (!mi)
 		return -EFAULT;
 
+	if (!mi)
+		return -EFAULT;
+
 	if (!incfs_fresh_pending_reads_exist(mi, last_known_read_sn))
 		return 0;
 
