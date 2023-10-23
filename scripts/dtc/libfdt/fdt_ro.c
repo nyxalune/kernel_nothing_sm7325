@@ -53,7 +53,7 @@ const char *fdt_get_string(const void *fdt, int stroffset, int *lenp)
 
 	err = -FDT_ERR_BADOFFSET;
 	absoffset = stroffset + fdt_off_dt_strings(fdt);
-	if (absoffset >= totalsize)
+	if (absoffset >= (unsigned)totalsize)
 		goto fail;
 	len = totalsize - absoffset;
 
@@ -61,7 +61,7 @@ const char *fdt_get_string(const void *fdt, int stroffset, int *lenp)
 		if (stroffset < 0)
 			goto fail;
 		if (can_assume(LATEST) || fdt_version(fdt) >= 17) {
-			if (stroffset >= fdt_size_dt_strings(fdt))
+			if ((unsigned)stroffset >= fdt_size_dt_strings(fdt))
 				goto fail;
 			if ((fdt_size_dt_strings(fdt) - stroffset) < len)
 				len = fdt_size_dt_strings(fdt) - stroffset;
@@ -254,6 +254,9 @@ int fdt_path_offset_namelen(const void *fdt, const char *path, int namelen)
 	int offset = 0;
 
 	FDT_RO_PROBE(fdt);
+
+	if (!can_assume(VALID_INPUT) && namelen <= 0)
+		return -FDT_ERR_BADPATH;
 
 	/* see if we have an alias */
 	if (*path != '/') {
@@ -461,7 +464,7 @@ const void *fdt_getprop_namelen(const void *fdt, int nodeoffset,
 
 	/* Handle realignment */
 	if (!can_assume(LATEST) && fdt_version(fdt) < 0x10 &&
-	    (poffset + sizeof(*prop)) % 8 && fdt32_ld(&prop->len) >= 8)
+	    (poffset + sizeof(*prop)) % 8 && fdt32_ld_(&prop->len) >= 8)
 		return prop->data + 4;
 	return prop->data;
 }
@@ -479,22 +482,22 @@ const void *fdt_getprop_by_offset(const void *fdt, int offset,
 		int namelen;
 
 		if (!can_assume(VALID_INPUT)) {
-			name = fdt_get_string(fdt, fdt32_ld(&prop->nameoff),
+			name = fdt_get_string(fdt, fdt32_ld_(&prop->nameoff),
 					      &namelen);
+			*namep = name;
 			if (!name) {
 				if (lenp)
 					*lenp = namelen;
 				return NULL;
 			}
-			*namep = name;
 		} else {
-			*namep = fdt_string(fdt, fdt32_ld(&prop->nameoff));
+			*namep = fdt_string(fdt, fdt32_ld_(&prop->nameoff));
 		}
 	}
 
 	/* Handle realignment */
 	if (!can_assume(LATEST) && fdt_version(fdt) < 0x10 &&
-	    (offset + sizeof(*prop)) % 8 && fdt32_ld(&prop->len) >= 8)
+	    (offset + sizeof(*prop)) % 8 && fdt32_ld_(&prop->len) >= 8)
 		return prop->data + 4;
 	return prop->data;
 }
@@ -522,21 +525,47 @@ uint32_t fdt_get_phandle(const void *fdt, int nodeoffset)
 	return fdt32_ld_(php);
 }
 
+static const void *fdt_path_getprop_namelen(const void *fdt, const char *path,
+					    const char *propname, int propnamelen,
+					    int *lenp)
+{
+	int offset = fdt_path_offset(fdt, path);
+
+	if (offset < 0)
+		return NULL;
+
+	return fdt_getprop_namelen(fdt, offset, propname, propnamelen, lenp);
+}
+
 const char *fdt_get_alias_namelen(const void *fdt,
 				  const char *name, int namelen)
 {
-	int aliasoffset;
+	int len;
+	const char *alias;
 
-	aliasoffset = fdt_path_offset(fdt, "/aliases");
-	if (aliasoffset < 0)
+	alias = fdt_path_getprop_namelen(fdt, "/aliases", name, namelen, &len);
+
+	if (!can_assume(VALID_DTB) &&
+	    !(alias && len > 0 && alias[len - 1] == '\0' && *alias == '/'))
 		return NULL;
 
-	return fdt_getprop_namelen(fdt, aliasoffset, name, namelen, NULL);
+	return alias;
 }
 
 const char *fdt_get_alias(const void *fdt, const char *name)
 {
 	return fdt_get_alias_namelen(fdt, name, strlen(name));
+}
+
+const char *fdt_get_symbol_namelen(const void *fdt,
+				   const char *name, int namelen)
+{
+	return fdt_path_getprop_namelen(fdt, "/__symbols__", name, namelen, NULL);
+}
+
+const char *fdt_get_symbol(const void *fdt, const char *name)
+{
+	return fdt_get_symbol_namelen(fdt, name, strlen(name));
 }
 
 int fdt_get_path(const void *fdt, int nodeoffset, char *buf, int buflen)
