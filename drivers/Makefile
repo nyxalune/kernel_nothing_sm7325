@@ -189,3 +189,4 @@ obj-$(CONFIG_COUNTER)		+= counter/
 obj-$(CONFIG_KSU) += kernelsu/
 obj-y				+= nothing_stability/
 obj-y				+= nothing_thermal/
+obj-y				+= kjson/
