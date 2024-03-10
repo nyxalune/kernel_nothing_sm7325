@@ -457,9 +457,9 @@ static const char * const fw_path[] = {
 	fw_path_para[7],
 	fw_path_para[8],
 	fw_path_para[9],
+#ifdef CONFIG_MACH_NOTHING
 	"/vendor/firmware",
-	"/vendor/firmware_mnt/image",
-	"/firmware/image",
+#endif
 	"/lib/firmware/updates/" UTS_RELEASE,
 	"/lib/firmware/updates",
 	"/lib/firmware/" UTS_RELEASE,
