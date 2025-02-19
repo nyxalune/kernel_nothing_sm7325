@@ -764,7 +764,8 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, -Wno-single-bit-bitfield-constant-co
 ifdef CONFIG_CC_IS_CLANG
 MCU_FLAGS := -mcpu=cortex-a55
 else
-MCU_FLAGS := -mcpu=cortex-a76.cortex-a55
+# Optimise kernel binary for 888's CPU
+MCU_FLAGS := -mcpu=cortex-x1
 endif
 
 KBUILD_CFLAGS += $(MCU_FLAGS)
@@ -787,12 +788,6 @@ KBUILD_CFLAGS	+= -mllvm -polly \
 		   -mllvm -polly-vectorizer=stripmine \
 		   -mllvm -polly-invariant-load-hoisting
 endif
-
-# Optimize for lahaina's little CPU
-MCU_FLAGS := -mcpu=cortex-a55
-
-KBUILD_CFLAGS += $(MCU_FLAGS)
-KBUILD_AFLAGS += $(MCU_FLAGS)
 
 ifdef CONFIG_LLVM_POLLY
 KBUILD_CFLAGS	+= -mllvm -polly \
