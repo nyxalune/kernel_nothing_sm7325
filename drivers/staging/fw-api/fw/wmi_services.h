@@ -687,6 +687,19 @@ typedef  enum  {
     WMI_SERVICE_USD_SUPPORT = 428, /* Indicates FW supports Unsynchronized Service Discovery */
     WMI_SERVICE_THERM_THROT_5_LEVELS = 429, /* Indicates FW support 5 thermal throttling levels */
     WMI_SERVICE_PROTECTED_TWT = 430, /* Indicates FW supports protected TWT operation */
+    WMI_SERVICE_SCAN_CACHE_REPORT_SUPPORT = 431, /* Indicates FW supports for sending scan cache report */
+    WMI_SERVICE_SCC_TPC_POWER_SUPPORT = 432, /* Indicates FW supports setting TPC power for SCC vdevs */
+    WMI_SERVICE_DYNAMIC_TWT_MODE_SUPPORT = 433, /* Indicates FW supports Dynamic TWT mode for vdevs */
+    WMI_SERVICE_SPECTRAL_SPUR_BIN_INFO_SUPPORT = 434, /* Indicates FW supports indicating spur frequency and spectral bin that gets affected due to spur frequency */
+    WMI_SERVICE_TWT_P2P_GO_CONCURRENCY_SUPPORT = 435, /* Indicates FW supports TWT in P2P GO concurrency mode */
+    WMI_SERVICE_UMAC_MIGRATION_SUPPORT = 436, /* Indicates that FW supports UMAC migration */
+    WMI_SERVICE_STA_TWT_STATS_EXT = 437, /* FW supports additional info in TWT stats and ADD COMPLETION Event */
+    WMI_SERVICE_OPT_DP_DIAG_SUPPORT = 438, /* FW supports diag QDATA feature */
+    WMI_SERVICE_MLO_ROAM_PARTNER_BRINGUP_FROM_HOST = 439, /* Indicates FW supports new design in which FW expects the host to bringup the partner link during roaming */
+    WMI_SERVICE_CTRL_PATH_PEER_BA_STATS = 440, /* FW supports retrieving BlockAck stats through WMI_REQUEST_CTRL_PATH_PEER_STAT */
+    WMI_SERVICE_CTRL_PATH_STA_DAR_STATS_SUPPORT = 441, /* FW supports DAR stats reporting for STA mode */
+    WMI_SERVICE_APF_DATA_OFFLOAD_SUPPORT_ENABLED = 442, /* Indicates FW support for APFv6 handling offloads and disable QC data offloads */
+    WMI_SERVICE_PER_VDEV_TWT_RESP_DISABLE_SUPPORT = 443, /* FW supports vdev level TWT responder disable */
 
 
     WMI_MAX_EXT2_SERVICE
