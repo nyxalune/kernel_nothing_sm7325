@@ -64,10 +64,11 @@
 #include <linux/rcuwait.h>
 #include <linux/compat.h>
 #include <linux/sysfs.h>
-#include <linux/usermode_driver.h>
+#include <linux/kprobes.h>
 
 #include <linux/uaccess.h>
 #include <asm/unistd.h>
+#include <asm/pgtable.h>
 #include <asm/mmu_context.h>
 
 /*
@@ -224,6 +225,7 @@ static void delayed_put_task_struct(struct rcu_head *rhp)
 {
 	struct task_struct *tsk = container_of(rhp, struct task_struct, rcu);
 
+	kprobe_flush_task(tsk);
 	perf_event_delayed_put(tsk);
 	trace_sched_process_free(tsk);
 	put_task_struct(tsk);
@@ -273,7 +275,6 @@ repeat:
 	}
 
 	write_unlock_irq(&tasklist_lock);
-	seccomp_filter_release(p);
 	release_thread(p);
 	put_task_struct_rcu_user(p);
 
@@ -530,18 +531,28 @@ static void exit_mm(void)
 	BUG_ON(mm != current->active_mm);
 	/* more a memory barrier than a real lock */
 	task_lock(current);
+	/*
+	 * When a thread stops operating on an address space, the loop
+	 * in membarrier_private_expedited() may not observe that
+	 * tsk->mm, and the loop in membarrier_global_expedited() may
+	 * not observe a MEMBARRIER_STATE_GLOBAL_EXPEDITED
+	 * rq->membarrier_state, so those would not issue an IPI.
+	 * Membarrier requires a memory barrier after accessing
+	 * user-space memory, before clearing tsk->mm or the
+	 * rq->membarrier_state.
+	 */
+	smp_mb__after_spinlock();
+	local_irq_disable();
 	current->mm = NULL;
-	up_read(&mm->mmap_sem);
+	membarrier_update_current_mm(NULL);
 	enter_lazy_tlb(mm, current);
+	local_irq_enable();
 	task_unlock(current);
+	up_read(&mm->mmap_sem);
 	mm_update_next_owner(mm);
 	mmput(mm);
-#ifdef CONFIG_ANDROID_SIMPLE_LMK
-	clear_thread_flag(TIF_MEMDIE);
-#else
 	if (test_thread_flag(TIF_MEMDIE))
 		exit_oom_victim();
-#endif
 }
 
 static struct task_struct *find_alive_thread(struct task_struct *p)
@@ -765,39 +776,10 @@ static void check_stack_usage(void)
 static inline void check_stack_usage(void) {}
 #endif
 
-#ifndef CONFIG_PROFILING
-static BLOCKING_NOTIFIER_HEAD(task_exit_notifier);
-
-int profile_event_register(enum profile_type t, struct notifier_block *n)
-{
-	if (t == PROFILE_TASK_EXIT)
-		return blocking_notifier_chain_register(&task_exit_notifier, n);
-
-	return -ENOSYS;
-}
-
-int profile_event_unregister(enum profile_type t, struct notifier_block *n)
-{
-	if (t == PROFILE_TASK_EXIT)
-		return blocking_notifier_chain_unregister(&task_exit_notifier,
-							  n);
-
-	return -ENOSYS;
-}
-
-void profile_task_exit(struct task_struct *tsk)
-{
-	blocking_notifier_call_chain(&task_exit_notifier, 0, tsk);
-}
-#endif
-
-void dead_special_task(void);
 void __noreturn do_exit(long code)
 {
 	struct task_struct *tsk = current;
 	int group_dead;
-
-	dead_special_task();
 
 	/*
 	 * We can get here from a kernel oops, sometimes with preemption off.
@@ -902,8 +884,7 @@ void __noreturn do_exit(long code)
 	exit_task_namespaces(tsk);
 	exit_task_work(tsk);
 	exit_thread(tsk);
-	if (group_dead)
-		exit_umh(tsk);
+	exit_umh(tsk);
 
 	sched_autogroup_exit_task(tsk);
 	cgroup_exit(tsk);
@@ -1533,7 +1514,7 @@ static int child_wait_callback(wait_queue_entry_t *wait, unsigned mode,
 void __wake_up_parent(struct task_struct *p, struct task_struct *parent)
 {
 	__wake_up_sync_key(&parent->signal->wait_chldexit,
-				TASK_INTERRUPTIBLE, 1, p);
+			   TASK_INTERRUPTIBLE, p);
 }
 
 static long do_wait(struct wait_opts *wo)
@@ -1809,30 +1790,6 @@ Efault:
 	return -EFAULT;
 }
 #endif
-
-/**
- * thread_group_exited - check that a thread group has exited
- * @pid: tgid of thread group to be checked.
- *
- * Test if the thread group represented by tgid has exited (all
- * threads are zombies, dead or completely gone).
- *
- * Return: true if the thread group has exited. false otherwise.
- */
-bool thread_group_exited(struct pid *pid)
-{
-	struct task_struct *task;
-	bool exited;
-
-	rcu_read_lock();
-	task = pid_task(pid, PIDTYPE_PID);
-	exited = !task ||
-		(READ_ONCE(task->exit_state) && thread_group_empty(task));
-	rcu_read_unlock();
-
-	return exited;
-}
-EXPORT_SYMBOL(thread_group_exited);
 
 __weak void abort(void)
 {
