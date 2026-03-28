@@ -588,6 +588,13 @@ typedef enum {
      * WMI cmd to set custom TX power backoff value per band/chain/MCS to PHY.
      */
     WMI_PDEV_SET_CUSTOM_TX_POWER_PER_MCS_CMDID,
+    /* WMI cmd to send Power Boost status update from Host */
+    WMI_PDEV_POWER_BOOST_CMDID,
+    /**
+     * WMI cmd to exchange the address of the DDR buffer allocated by the Host
+     * for Power Boost feature
+     */
+    WMI_PDEV_POWER_BOOST_MEM_ADDR_CMDID,
 
 
     /* VDEV (virtual device) specific commands */
@@ -713,6 +720,8 @@ typedef enum {
      * (only applicable for STA vdev)
      */
     WMI_VDEV_REPORT_AP_OPER_BW_CMDID,
+
+    WMI_VDEV_VBSS_CONFIG_CMDID,
 
 
     /* peer specific commands */
@@ -1343,6 +1352,9 @@ typedef enum {
     /** Unsynchronized Service Discovery */
     WMI_USD_SERVICE_CMDID,
 
+    /** WMI command to get scan cached result */
+    WMI_GET_SCAN_CACHE_RESULT_CMDID,
+
 
     /*  Offload 11k related requests */
     WMI_11K_OFFLOAD_REPORT_CMDID = WMI_CMD_GRP_START_ID(WMI_GRP_11K_OFFLOAD),
@@ -1700,6 +1712,8 @@ typedef enum {
     WMI_SAWF_SVC_CLASS_CFG_CMDID = WMI_CMD_GRP_START_ID(WMI_GRP_SAWF),
     /** disable a service class */
     WMI_SAWF_SVC_CLASS_DISABLE_CMDID,
+    /** update hop count value for SDWF-Ezmesh scenario */
+    WMI_SAWF_EZMESH_HOP_COUNT_CMDID,
 
     /* WMI commands specific to ODD */
     WMI_ODD_LIVEDUMP_REQUEST_CMDID = WMI_CMD_GRP_START_ID(WMI_GRP_ODD),
@@ -38553,13 +38567,13 @@ static INLINE A_UINT8 *wmi_id_to_name(A_UINT32 wmi_command)
         WMI_RETURN_STRING(WMI_SET_AP_SUSPEND_RESUME_CMDID);
         WMI_RETURN_STRING(WMI_P2P_GO_DFS_AP_CONFIG_CMDID);
         WMI_RETURN_STRING(WMI_USD_SERVICE_CMDID);
-        WMI_RETURN_STRING(WMI_PDEV_POWER_BOOST_CMDID);
-        WMI_RETURN_STRING(WMI_PDEV_POWER_BOOST_MEM_ADDR_CMDID);
-        WMI_RETURN_STRING(WMI_GET_SCAN_CACHE_RESULT_CMDID);
+        //WMI_RETURN_STRING(WMI_PDEV_POWER_BOOST_CMDID);
+        //WMI_RETURN_STRING(WMI_PDEV_POWER_BOOST_MEM_ADDR_CMDID);
+        //WMI_RETURN_STRING(WMI_GET_SCAN_CACHE_RESULT_CMDID);
         WMI_RETURN_STRING(WMI_MLO_LINK_RECONFIG_CMDID);
         WMI_RETURN_STRING(WMI_MLO_LINK_RECONFIG_COMPLETE_CMDID);
-        WMI_RETURN_STRING(WMI_SAWF_EZMESH_HOP_COUNT_CMDID);
-        WMI_RETURN_STRING(WMI_VDEV_VBSS_CONFIG_CMDID);
+        //WMI_RETURN_STRING(WMI_SAWF_EZMESH_HOP_COUNT_CMDID);
+        //WMI_RETURN_STRING(WMI_VDEV_VBSS_CONFIG_CMDID);
         WMI_RETURN_STRING(WMI_NDP_SET_LATENCY_TPUT_CMDID);
         WMI_RETURN_STRING(WMI_MLO_LINK_TTLM_COMPLETE_CMDID);
         WMI_RETURN_STRING(WMI_BPF_SET_SUPPORTED_OFFLOAD_BITMAP_CMDID);

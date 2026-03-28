@@ -3641,6 +3641,13 @@ WMITLV_CREATE_PARAM_STRUC(WMI_VDEV_SET_PARAM_CMDID);
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_vdev_update_mac_addr_cmd_fixed_param, wmi_vdev_update_mac_addr_cmd_fixed_param, fixed_param, WMITLV_SIZE_FIX)
 WMITLV_CREATE_PARAM_STRUC(WMI_VDEV_UPDATE_MAC_ADDR_CMDID);
 
+/* VDEV VBSS CONFIG COMMAND */
+#define WMITLV_TABLE_WMI_VDEV_VBSS_CONFIG_CMDID(id,op,buf,len) \
+    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_vdev_vbss_config_cmd_fixed_param, wmi_vdev_vbss_config_cmd_fixed_param, fixed_param, WMITLV_SIZE_FIX)\
+    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_vdev_vbss_peer_pn_info, vbss_peer_pn_info, WMITLV_SIZE_VAR) \
+    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_vdev_vbss_peer_sn_info, vbss_peer_sn_info, WMITLV_SIZE_VAR)
+WMITLV_CREATE_PARAM_STRUC(WMI_VDEV_VBSS_CONFIG_CMDID);
+
 /* Pdev suspend Cmd */
 #define WMITLV_TABLE_WMI_PDEV_SUSPEND_CMDID(id,op,buf,len)                                                         \
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_pdev_suspend_cmd_fixed_param, wmi_pdev_suspend_cmd_fixed_param, fixed_param, WMITLV_SIZE_FIX)
@@ -5375,8 +5382,8 @@ WMITLV_CREATE_PARAM_STRUC(WMI_MLO_LINK_RECOMMENDATION_CMDID);
 /** WMI cmd to start STA initialized link reconfig */
 #define WMITLV_TABLE_WMI_MLO_LINK_RECONFIG_CMDID(id,op,buf,len) \
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_mlo_link_reconfig_fixed_param, wmi_mlo_link_reconfig_fixed_param, fixed_param, WMITLV_SIZE_FIX) \
-    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_mlo_link_add_param, link_add_param, WMITLV_SIZE_VAR) \
-    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_mlo_link_del_param, link_del_param, WMITLV_SIZE_VAR)
+    /*WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_mlo_link_add_param, link_add_param, WMITLV_SIZE_VAR)*/ \
+    /*WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_mlo_link_del_param, link_del_param, WMITLV_SIZE_VAR)*/
 WMITLV_CREATE_PARAM_STRUC(WMI_MLO_LINK_RECONFIG_CMDID);
 
 /** WMI cmd to notify fw completion of link reconfig */
@@ -7245,8 +7252,8 @@ WMITLV_CREATE_PARAM_STRUC(WMI_PEER_STATS_INFO_EVENTID);
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_ctrl_path_sta_rrm_stats_struct,  ctrl_path_sta_rrm_stats, WMITLV_SIZE_VAR) \
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_ctrl_path_vdev_bcn_tx_stats_struct,  ctrl_path_vdev_bcn_tx_stats, WMITLV_SIZE_VAR) \
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_ctrl_path_pdev_bcn_tx_stats_struct,  ctrl_path_pdev_bcn_tx_stats, WMITLV_SIZE_VAR) \
-    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_ctrl_path_pdev_conn_stats_struct,  ctrl_path_pdev_conn_stats, WMITLV_SIZE_VAR) \
-    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_ctrl_path_ml_rcfg_stats_struct, ctrl_path_ml_rcfg_stats, WMITLV_SIZE_VAR) \
+    /*WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_ctrl_path_pdev_conn_stats_struct,  ctrl_path_pdev_conn_stats, WMITLV_SIZE_VAR)*/ \
+    /*WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_ctrl_path_ml_rcfg_stats_struct, ctrl_path_ml_rcfg_stats, WMITLV_SIZE_VAR)*/ \
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_ctrl_path_sta_dar_stats_struct, ctrl_path_sta_dar_stats, WMITLV_SIZE_VAR)
 WMITLV_CREATE_PARAM_STRUC(WMI_CTRL_PATH_STATS_EVENTID);
 
