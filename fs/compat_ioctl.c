@@ -197,20 +197,6 @@ COMPAT_SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd,
 		goto out_fput;
 #endif
 
-	case FICLONE:
-		goto do_ioctl;
-	case FICLONERANGE:
-	case FIDEDUPERANGE:
-	case FS_IOC_FIEMAP:
-	case FIGETBSZ:
-		goto found_handler;
-
-	case FIBMAP:
-	case FIONREAD:
-		if (S_ISREG(file_inode(f.file)->i_mode))
-			break;
-		/*FALL THROUGH*/
-
 	default:
 		if (f.file->f_op->compat_ioctl) {
 			error = f.file->f_op->compat_ioctl(f.file, cmd, arg);

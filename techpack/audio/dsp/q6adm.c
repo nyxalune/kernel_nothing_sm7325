@@ -6152,6 +6152,143 @@ done:
 }
 EXPORT_SYMBOL(adm_get_doa_tracking_mon);
 
+#ifdef OPLUS_FEATURE_AUDIODETECT
+static ssize_t pb_det_read(struct file *file,
+				char __user *user_buf, size_t count,
+				loff_t *ppos)
+{
+	char *str = NULL;
+	int ret = 0;
+
+	str = kmalloc(PAGE_SIZE, GFP_KERNEL);
+
+	//ret = adm_get_all_mute_pp_param();
+
+	ret = snprintf(str, PAGE_SIZE, "%d %d %d %d",
+		general_playback_muted_cnt, general_playback_zd_cnt, general_playback_pop_cnt, general_playback_clip_cnt);
+
+	ret = simple_read_from_buffer(user_buf, count, ppos, str, ret);
+
+	general_playback_muted_cnt = 0;
+	general_playback_zd_cnt = 0;
+	general_playback_pop_cnt = 0;
+	general_playback_clip_cnt = 0;
+
+	kfree(str);
+
+	return ret;
+}
+
+static const struct proc_ops pb_det_ops = {
+	.proc_open = simple_open,
+	.proc_read = pb_det_read,
+	.proc_lseek = default_llseek,
+};
+
+static ssize_t rec_det_read(struct file *file,
+				char __user *user_buf, size_t count,
+				loff_t *ppos)
+{
+	char *str = NULL;
+	int ret = 0;
+
+	str = kmalloc(PAGE_SIZE, GFP_KERNEL);
+
+	//ret = adm_get_all_mute_pp_param();
+
+	ret = snprintf(str, PAGE_SIZE, "%d %d %d %d",
+		general_record_muted_cnt, general_record_zd_cnt, general_record_pop_cnt, general_record_clip_cnt);
+
+	ret = simple_read_from_buffer(user_buf, count, ppos, str, ret);
+
+	general_record_muted_cnt = 0;
+	general_record_zd_cnt = 0;
+	general_record_pop_cnt = 0;
+	general_record_clip_cnt = 0;
+
+	kfree(str);
+
+	return ret;
+}
+
+static const struct proc_ops rec_det_ops = {
+	.proc_open = simple_open,
+	.proc_read = rec_det_read,
+	.proc_lseek = default_llseek,
+};
+
+static ssize_t voip_det_read(struct file *file,
+				char __user *user_buf, size_t count,
+				loff_t *ppos)
+{
+	char *str = NULL;
+	int ret = 0;
+
+	str = kmalloc(PAGE_SIZE, GFP_KERNEL);
+
+	//ret = adm_get_all_mute_pp_param();
+
+	ret = snprintf(str, PAGE_SIZE, "%d %d %d %d %d %d %d %d",
+		voip_rx_muted_cnt, voip_rx_zd_cnt, voip_rx_pop_cnt, voip_rx_clip_cnt,
+		voip_tx_muted_cnt, voip_tx_zd_cnt, voip_tx_pop_cnt, voip_tx_clip_cnt);
+
+	ret = simple_read_from_buffer(user_buf, count, ppos, str, ret);
+
+	voip_rx_muted_cnt = 0;
+	voip_rx_zd_cnt = 0;
+	voip_rx_pop_cnt = 0;
+	voip_rx_clip_cnt = 0;
+	voip_tx_muted_cnt = 0;
+	voip_tx_zd_cnt = 0;
+	voip_tx_pop_cnt = 0;
+	voip_tx_clip_cnt = 0;
+
+	kfree(str);
+
+	return ret;
+}
+
+static const struct proc_ops voip_det_ops = {
+	.proc_open = simple_open,
+	.proc_read = voip_det_read,
+	.proc_lseek = default_llseek,
+};
+
+static ssize_t voice_det_read(struct file *file,
+				char __user *user_buf, size_t count,
+				loff_t *ppos)
+{
+	char *str = NULL;
+	int ret = 0;
+
+	str = kmalloc(PAGE_SIZE, GFP_KERNEL);
+
+	ret = snprintf(str, PAGE_SIZE, "%d %d %d %d %d %d %d %d",
+		voice_rx_muted_cnt, voice_rx_zd_cnt, voice_rx_pop_cnt, voice_rx_clip_cnt,
+		voice_tx_muted_cnt, voice_tx_zd_cnt, voice_tx_pop_cnt, voice_tx_clip_cnt);
+
+	ret = simple_read_from_buffer(user_buf, count, ppos, str, ret);
+
+	voice_rx_muted_cnt = 0;
+	voice_rx_zd_cnt = 0;
+	voice_rx_pop_cnt = 0;
+	voice_rx_clip_cnt = 0;
+	voice_tx_muted_cnt = 0;
+	voice_tx_zd_cnt = 0;
+	voice_tx_pop_cnt = 0;
+	voice_tx_clip_cnt = 0;
+
+	kfree(str);
+
+	return ret;
+}
+
+static const struct proc_ops voice_det_ops = {
+	.proc_open = simple_open,
+	.proc_read = voice_det_read,
+	.proc_lseek = default_llseek,
+};
+#endif /* OPLUS_FEATURE_AUDIODETECT */
 int __init adm_init(void)
 {
 	int i = 0, j;
