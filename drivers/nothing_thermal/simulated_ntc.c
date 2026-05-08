@@ -382,8 +382,7 @@ static int proc_shell_open(struct inode *inode, struct file *file)
 	return single_open(file, proc_shell_show, NULL);
 }
 
-
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
 static const struct proc_ops proc_shell_fops = {
 	.proc_open = proc_shell_open,
 	.proc_write = proc_shell_write,
