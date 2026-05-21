@@ -96,7 +96,6 @@
 #include <linux/cpufreq_times.h>
 #include <linux/stackleak.h>
 #include <linux/scs.h>
-#include <linux/devfreq_boost.h>
 #include <linux/simple_lmk.h>
 
 #include <asm/pgalloc.h>
