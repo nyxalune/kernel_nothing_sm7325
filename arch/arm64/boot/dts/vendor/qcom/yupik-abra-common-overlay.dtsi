@@ -5,6 +5,10 @@
 		memory-region = <&reserved_xbl_uefi>;
 		log,offset_size = <0x4000 0x100000>;
 	};
+
+	nt_thermal_interface: nt-thermal-interface {
+		board-sensor = "VIRTUAL-SENSOR";
+	};
 };
 
 // 0x83A00000 reaseved for ramoops
