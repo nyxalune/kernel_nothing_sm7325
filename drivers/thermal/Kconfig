@@ -446,4 +446,11 @@ config SPRD_THERMAL
 	help
 	  Support for the Spreadtrum thermal sensor driver in the Linux thermal
 	  framework.
+
+config NT_THERMAL_INTERFACE
+	tristate "Nothing thermal control interface"
+	depends on THERMAL
+	help
+	  Support for Nothing thermal control interface.
+
 endif
