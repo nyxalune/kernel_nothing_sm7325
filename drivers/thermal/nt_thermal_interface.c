@@ -260,6 +260,10 @@ static ssize_t thermal_board_sensor_temp_store(struct device *dev,
 					       const char *buf, size_t len)
 {
 	snprintf(board_sensor_temp, sizeof(board_sensor_temp), buf);
+	return len;
+}
+
+static DEVICE_ATTR(board_sensor_temp, 0664, thermal_board_sensor_temp_show,
 		   thermal_board_sensor_temp_store);
 
 static ssize_t thermal_board_sensor_second_temp_show(struct device *dev,
@@ -274,6 +278,10 @@ static ssize_t thermal_board_sensor_second_temp_store(struct device *dev,
 						      const char *buf, size_t len)
 {
 	snprintf(board_sensor_second_temp, sizeof(board_sensor_second_temp), buf);
+	return len;
+}
+
+static DEVICE_ATTR(board_sensor_second_temp, 0664,
 		   thermal_board_sensor_second_temp_show,
 		   thermal_board_sensor_second_temp_store);
 
