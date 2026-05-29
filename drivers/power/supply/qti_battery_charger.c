@@ -63,19 +63,19 @@
 #define DIVIDE_1000000_TIMES			1000000
 
 enum{
-       BoundT0_HEAD = 1,
-       BoundT1_HEAD = 2,
-       BoundT0_Recovery_HEAD = 3,
-       BoundT1_Recovery_HEAD = 4,
-       T0Ibat_HEAD = 5,
-       T1Ibat_HEAD = 6,
-       Ibat_HEAD = 0,
+	BoundT0_HEAD = 1,
+	BoundT1_HEAD = 2,
+	BoundT0_Recovery_HEAD = 3,
+	BoundT1_Recovery_HEAD = 4,
+	T0Ibat_HEAD = 5,
+	T1Ibat_HEAD = 6,
+	Ibat_HEAD = 0,
 };
 int nt_fcc_flag = -1;
 #define CYCLE_COUNT		20
 enum nt_health_chg_ctrol {
-     NT_HEALTH_ENABLE_CHG = 3,
-     NT_HEALTH_DISABLE_CHG = 4,
+	NT_HEALTH_ENABLE_CHG = 3,
+	NT_HEALTH_DISABLE_CHG = 4,
 };
 
 enum usb_connector_type {
@@ -892,12 +892,12 @@ static void nt_update_status_function_work(struct work_struct *work)
 		}
 		pre_capacity = capacity;
 	}
-
 	count++;
 	if (count > CYCLE_COUNT) {
 		count = 0;
 		pr_info("nt_fcc_flag:%d\n", nt_fcc_flag);
 	}
+
 out:
 	queue_delayed_work(system_wq, &bcdev->nt_update_status_work,
 								round_jiffies(10 * HZ));
@@ -2079,8 +2079,8 @@ static ssize_t slowcharge_en_store(struct class *c, struct class_attribute *attr
 
 	pr_info("%s,val:%d", __func__, val);
 
-   if (val == NT_HEALTH_DISABLE_CHG || val == NT_HEALTH_ENABLE_CHG)
-        nt_fcc_flag = val;
+	if (val == NT_HEALTH_DISABLE_CHG || val == NT_HEALTH_ENABLE_CHG)
+		nt_fcc_flag = val;
 
 	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_USB],
 				USB_SLOWCHARGE_ENABLE, val);
@@ -2140,15 +2140,12 @@ static ssize_t wls_volt_tx_show(struct class *c, struct class_attribute *attr,
 						battery_class);
 	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_WLS];
 	int rc;
-
 	rc = read_property_id(bcdev, pst, WLS_VOLT_TX);
 	if (rc < 0)
 		return rc;
-
 	return scnprintf(buf, PAGE_SIZE, "%d\n", pst->prop[WLS_VOLT_TX]);
 }
 static CLASS_ATTR_RO(wls_volt_tx);
-
 static ssize_t wls_curr_tx_show(struct class *c, struct class_attribute *attr,
 				char *buf)
 {
@@ -2156,15 +2153,12 @@ static ssize_t wls_curr_tx_show(struct class *c, struct class_attribute *attr,
 						battery_class);
 	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_WLS];
 	int rc;
-
 	rc = read_property_id(bcdev, pst, WLS_CURR_TX);
 	if (rc < 0)
 		return rc;
-
 	return scnprintf(buf, PAGE_SIZE, "%d\n", pst->prop[WLS_CURR_TX]);
 }
 static CLASS_ATTR_RO(wls_curr_tx);
-
 static ssize_t wls_st38_reg_show(struct class *c, struct class_attribute *attr,
 				char *buf)
 {
@@ -2172,14 +2166,11 @@ static ssize_t wls_st38_reg_show(struct class *c, struct class_attribute *attr,
 						battery_class);
 	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_WLS];
 	int rc;
-
 	rc = read_property_id(bcdev, pst, WLS_ST38_REG);
 	if (rc < 0)
 		return rc;
-
 	return scnprintf(buf, PAGE_SIZE, "0x%04x\n", pst->prop[WLS_ST38_REG]);
 }
-
 static ssize_t wls_st38_reg_store(struct class *c,
 					struct class_attribute *attr,
 					const char *buf, size_t count)
@@ -2188,7 +2179,6 @@ static ssize_t wls_st38_reg_store(struct class *c,
 						battery_class);
 	int rc;
 	u32 val;
-
 	if (kstrtou32(buf, 16, &val))
 		return -EINVAL;
 
@@ -2198,11 +2188,9 @@ static ssize_t wls_st38_reg_store(struct class *c,
 				WLS_ST38_REG, val);
 	if (rc < 0)
 		return rc;
-
 	return count;
 }
 static CLASS_ATTR_RW(wls_st38_reg);
-
 static ssize_t wls_st38_data_show(struct class *c, struct class_attribute *attr,
 				char *buf)
 {
@@ -2210,14 +2198,11 @@ static ssize_t wls_st38_data_show(struct class *c, struct class_attribute *attr,
 						battery_class);
 	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_WLS];
 	int rc;
-
 	rc = read_property_id(bcdev, pst, WLS_ST38_DATA);
 	if (rc < 0)
 		return rc;
-
 	return scnprintf(buf, PAGE_SIZE, "0x%04x; %d\n", pst->prop[WLS_ST38_DATA], pst->prop[WLS_ST38_DATA]);
 }
-
 static ssize_t wls_st38_data_store(struct class *c,
 					struct class_attribute *attr,
 					const char *buf, size_t count)
@@ -2226,7 +2211,6 @@ static ssize_t wls_st38_data_store(struct class *c,
 						battery_class);
 	int rc;
 	u32 val;
-
 	if (kstrtou32(buf, 0, &val))
 		return -EINVAL;
 
@@ -2236,12 +2220,9 @@ static ssize_t wls_st38_data_store(struct class *c,
 				WLS_ST38_DATA, val);
 	if (rc < 0)
 		return rc;
-
 	return count;
 }
 static CLASS_ATTR_RW(wls_st38_data);
-
-
 static ssize_t wls_reverse_status_show(struct class *c, struct class_attribute *attr,
 				char *buf)
 {
@@ -2249,11 +2230,9 @@ static ssize_t wls_reverse_status_show(struct class *c, struct class_attribute *
 						battery_class);
 	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_WLS];
 	int rc;
-
 	rc = read_property_id(bcdev, pst, WLS_REVERSE_STATUS);
 	if (rc < 0)
 		return rc;
-
 	return scnprintf(buf, PAGE_SIZE, "0x%x\n", pst->prop[WLS_REVERSE_STATUS]);
 }
 static CLASS_ATTR_RO(wls_reverse_status);
@@ -2310,14 +2289,14 @@ static ssize_t wls_en_store(struct class *c,
 
 	return count;
 }
-
 static CLASS_ATTR_RW(wls_en);
+#endif
 
 static ssize_t wls_chg_param_show(struct class *c, struct class_attribute *attr,
 				char *buf)
 {
 	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
-						battery_class);
+										battery_class);
 	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_WLS];
 	int rc;
 
@@ -2333,13 +2312,14 @@ static ssize_t wls_chg_param_store(struct class *c,
 					const char *buf, size_t count)
 {
 	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
-						battery_class);
+										battery_class);
 	int rc;
 	int T0,T1,T0_R,T1_R,T0_ibat,T1_ibat,defalut_ibat;
 
 	pr_info("%s,buf:%s", __func__, buf);
 
-    rc = sscanf(buf, "%d %d %d %d %d %d %d", &T0,&T1,&T0_R,&T1_R,&T0_ibat,&T1_ibat,&defalut_ibat);
+    rc = sscanf(buf, "%d %d %d %d %d %d %d", &T0,&T1,&T0_R,&T1_R,&T0_ibat,&T1_ibat,&defalut_ibat
+);
     T0 = T0 + 10000 * BoundT0_HEAD;
     T1 = T1 + 10000 * BoundT1_HEAD;
     T0_R = T0_R + 10000 * BoundT0_Recovery_HEAD;
@@ -2352,10 +2332,14 @@ static ssize_t wls_chg_param_store(struct class *c,
             rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, T1);
             rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, T0_R);
             rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, T1_R);
-            rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, T0_ibat);
-            rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, T1_ibat);
-            rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, defalut_ibat);
-            pr_info("%d, %d, %d, %d, %d, %d, %d", T0, T1, T0_R, T1_R, T0_ibat, T1_ibat, defalut_ibat);
+            rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, T0_ibat
+);
+            rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, T1_ibat
+);
+            rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_CHG_PARAM, defalut
+_ibat);
+            pr_info("%d, %d, %d, %d, %d, %d, %d", T0, T1, T0_R, T1_R, T0_ibat, T1_ibat, defalut_
+ibat);
     } else {
         pr_info("%s,param_store fail", __func__);
     }
@@ -2365,10 +2349,10 @@ static ssize_t wls_chg_param_store(struct class *c,
 static CLASS_ATTR_RW(wls_chg_param);
 
 static ssize_t syssoc_show(struct class *c, struct class_attribute *attr,
-                char *buf)
+			char *buf)
 {
     struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
-                        battery_class);
+						battery_class);
     struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_BATTERY];
     int rc;
 
@@ -2383,10 +2367,10 @@ static ssize_t syssoc_show(struct class *c, struct class_attribute *attr,
 static CLASS_ATTR_RO(syssoc);
 
 static ssize_t batsoc_show(struct class *c, struct class_attribute *attr,
-                char *buf)
+			char *buf)
 {
     struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
-                        battery_class);
+						battery_class);
     struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_BATTERY];
     int rc;
 
@@ -2399,47 +2383,6 @@ static ssize_t batsoc_show(struct class *c, struct class_attribute *attr,
 
 
 static CLASS_ATTR_RO(batsoc);
-
-#endif
-
-#if defined(CONFIG_NT_CHG) && defined(CONFIG_STWLC38_FW) 
-static ssize_t charging_en_show(struct class *c, struct class_attribute *attr,
-				char *buf)
-{
-	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
-						battery_class);
-	struct psy_state *pst_usb = &bcdev->psy_list[PSY_TYPE_USB];
-	struct psy_state *pst_wls = &bcdev->psy_list[PSY_TYPE_WLS];
-	int charging_enabled;
-
-        read_property_id(bcdev, pst_usb, USB_CHARGE_ENABLE);
-	read_property_id(bcdev, pst_wls, WLS_ST38_EN);
-
-	charging_enabled = ((!!pst_usb->prop[USB_CHARGE_ENABLE]) && (!!pst_wls->prop[WLS_ST38_EN]));
-
-	return scnprintf(buf, PAGE_SIZE, "%d\n", charging_enabled);
-}
-
-static ssize_t charging_en_store(struct class *c,
-					struct class_attribute *attr,
-					const char *buf, size_t count) 
-{
-	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
-						battery_class);
-	u32 val;
-
-	if (kstrtou32(buf, 0, &val))
-		return -EINVAL;
-
-	pr_info("%s,val:%d", __func__, val);
-
-        write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_USB], USB_CHARGE_ENABLE, val);
-        write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS], WLS_ST38_EN, val);
-
-	return count;
-}
-static CLASS_ATTR_RW(charging_en);
-#endif
 
 static struct attribute *battery_class_attrs[] = {
 	&class_attr_soh.attr,
@@ -2478,10 +2421,6 @@ static struct attribute *battery_class_attrs[] = {
 #endif
 	&class_attr_syssoc.attr,
 	&class_attr_batsoc.attr,
-
-#if defined(CONFIG_NT_CHG) && defined(CONFIG_STWLC38_FW)
-        &class_attr_charging_en.attr,
-#endif
 	NULL,
 };
 ATTRIBUTE_GROUPS(battery_class);
