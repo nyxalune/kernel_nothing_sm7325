@@ -2079,8 +2079,8 @@ static ssize_t slowcharge_en_store(struct class *c, struct class_attribute *attr
 
 	pr_info("%s,val:%d", __func__, val);
 
-	if (val == NT_HEALTH_DISABLE_CHG || val == NT_HEALTH_ENABLE_CHG)
-		nt_fcc_flag = val;
+   if (val == NT_HEALTH_DISABLE_CHG || val == NT_HEALTH_ENABLE_CHG)
+        nt_fcc_flag = val;
 
 	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_USB],
 				USB_SLOWCHARGE_ENABLE, val);
