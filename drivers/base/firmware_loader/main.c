@@ -459,7 +459,6 @@ static const char * const fw_path[] = {
 	fw_path_para[9],
 #ifdef CONFIG_MACH_NOTHING
 	"/vendor/firmware",
-	"/vendor/firmware_mnt/image",
 #endif
 	"/lib/firmware/updates/" UTS_RELEASE,
 	"/lib/firmware/updates",
