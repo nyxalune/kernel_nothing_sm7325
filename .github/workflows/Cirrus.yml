@@ -71,8 +71,9 @@ jobs:
             || { echo "❌ mkdtboimg.py verification failed"; exit 1; }
           echo "MKDTBOIMG=$MKDTBOIMG" >> $GITHUB_ENV
       # -------------------------------------------------------------------
-      # Download and install Greenforce Clang using the official setup
-      # script, which always fetches the latest release automatically.
+      # Download and install Greenforce Clang by querying the GitHub
+      # Releases API for the latest tag, then constructing the tarball
+      # URL from that tag. This avoids parsing the setup shell script.
       # Exports all required build environment variables afterwards.
       # -------------------------------------------------------------------
       - name: Setup Greenforce Clang
@@ -83,9 +84,24 @@ jobs:
           rm -rf "$TOOLCHAIN_DIR"
           mkdir -p "$TOOLCHAIN_DIR"
 
-          echo "📥 Fetching latest Greenforce Clang download URL..."
-          GF_URL=$(wget -qO- https://raw.githubusercontent.com/greenforce-project/greenforce_clang/refs/heads/main/get_clang.sh \
-            | grep -oP 'https://github\.com/greenforce-project/greenforce_clang/releases/download/\S+\.tar\.gz' \
+          echo "📥 Fetching latest Greenforce Clang release tag..."
+          LATEST_TAG=$(wget -qO- \
+            "https://api.github.com/repos/greenforce-project/greenforce_clang/releases/latest" \
+            | grep '"tag_name"' \
+            | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "❌ Failed to resolve latest Greenforce Clang tag"
+            exit 1
+          fi
+          echo "✓ Latest tag: $LATEST_TAG"
+
+          # Find the .tar.gz asset URL from the release assets list
+          GF_URL=$(wget -qO- \
+            "https://api.github.com/repos/greenforce-project/greenforce_clang/releases/latest" \
+            | grep '"browser_download_url"' \
+            | grep '\.tar\.gz' \
+            | sed 's/.*"browser_download_url": *"\([^"]*\)".*/\1/' \
             | head -1)
 
           if [ -z "$GF_URL" ]; then
