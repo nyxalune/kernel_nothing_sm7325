@@ -71,9 +71,9 @@ jobs:
             || { echo "❌ mkdtboimg.py verification failed"; exit 1; }
           echo "MKDTBOIMG=$MKDTBOIMG" >> $GITHUB_ENV
       # -------------------------------------------------------------------
-      # Download and install Greenforce Clang by querying the GitHub
-      # Releases API for the latest tag, then constructing the tarball
-      # URL from that tag. This avoids parsing the setup shell script.
+      # Download and install a pinned Greenforce Clang release.
+      # Version : 23.0.0  |  Release date : 20260516
+      # URL is hardcoded — update GF_URL below to upgrade the toolchain.
       # Exports all required build environment variables afterwards.
       # -------------------------------------------------------------------
       - name: Setup Greenforce Clang
@@ -84,33 +84,8 @@ jobs:
           rm -rf "$TOOLCHAIN_DIR"
           mkdir -p "$TOOLCHAIN_DIR"
 
-          echo "📥 Fetching latest Greenforce Clang release tag..."
-          LATEST_TAG=$(wget -qO- \
-            "https://api.github.com/repos/greenforce-project/greenforce_clang/releases/latest" \
-            | grep '"tag_name"' \
-            | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
-
-          if [ -z "$LATEST_TAG" ]; then
-            echo "❌ Failed to resolve latest Greenforce Clang tag"
-            exit 1
-          fi
-          echo "✓ Latest tag: $LATEST_TAG"
-
-          # Find the .tar.gz asset URL from the release assets list
-          GF_URL=$(wget -qO- \
-            "https://api.github.com/repos/greenforce-project/greenforce_clang/releases/latest" \
-            | grep '"browser_download_url"' \
-            | grep '\.tar\.gz' \
-            | sed 's/.*"browser_download_url": *"\([^"]*\)".*/\1/' \
-            | head -1)
-
-          if [ -z "$GF_URL" ]; then
-            echo "❌ Failed to resolve Greenforce Clang download URL"
-            exit 1
-          fi
-          echo "✓ Latest URL: $GF_URL"
-
-          echo "📥 Downloading Greenforce Clang..."
+          GF_URL="https://github.com/greenforce-project/greenforce_clang/releases/download/20260516/gf-clang-23.0.0-20260516.tar.gz"
+          echo "📥 Downloading Greenforce Clang 23.0.0 (20260516)..."
           wget -q --show-progress "$GF_URL" -O /tmp/greenforce-clang.tar.gz
 
           echo "📦 Extracting Greenforce Clang..."
@@ -419,3 +394,5 @@ jobs:
         with:
           name: GFClang-${{ github.event.inputs.build_tag }}-Kernel
           path: ${{ env.ZIP_FILE }}
+
+          
