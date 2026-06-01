@@ -32,6 +32,7 @@
 #include <linux/sysfs.h>
 #include <linux/debugfs.h>
 #include <linux/cpuhotplug.h>
+#include <linux/kernel_read_file.h>
 
 #include "zram_drv.h"
 
@@ -1188,16 +1189,17 @@ static void comp_params_reset(struct zram *zram, u32 prio)
 static int comp_params_store(struct zram *zram, u32 prio, s32 level,
 			     const char *dict_path)
 {
-	loff_t sz = 0;
+	size_t sz = 0;
 	int ret = 0;
 
 	comp_params_reset(zram, prio);
 
 	if (dict_path) {
 		ret = kernel_read_file_from_path(dict_path,
+						 0,  /* offset */
 						 &zram->params[prio].dict,
-						 &sz,
 						 INT_MAX,
+						 &sz,
 						 READING_POLICY);
 		if (ret)
 			return ret;
