@@ -131,7 +131,9 @@ static struct notifier_block drm_notifier = {
 	.notifier_call = lpm_drm_panel_notify,
 };
 
+#ifdef CONFIG_NT_THERMAL_INTERFACE
 extern struct drm_panel *get_panel(void);
+#endif
 #else
 static bool sleep_disabled;
 module_param_named(sleep_disabled, sleep_disabled, bool, 0664);
@@ -1764,7 +1766,7 @@ static int lpm_probe(struct platform_device *pdev)
 	unsigned int cpu;
 	struct hrtimer *cpu_histtimer;
 	struct kobject *module_kobj = NULL;
-#ifdef CONFIG_DRM_PANEL
+#ifdef CONFIG_NT_THERMAL_INTERFACE
 	struct drm_panel *active_panel = get_panel();
 
 	if (!active_panel)
