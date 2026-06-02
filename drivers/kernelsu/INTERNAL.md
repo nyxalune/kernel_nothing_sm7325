@@ -54,7 +54,7 @@
 - causes heavy inlining (high stack overflow risk)
 - ensure inlining control (inline, noinline attributes)
 - stack safety is disabled
-- redefines str/mem fn's to builtins if !FORTIFY_SOURCE
+- redefines str/mem fn's to builtins
 
 ## compat handling
 - always redefine/override if possible
