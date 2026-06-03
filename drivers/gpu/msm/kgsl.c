@@ -19,6 +19,7 @@
 #include <linux/of.h>
 #include <linux/of_fdt.h>
 #include <linux/pm_runtime.h>
+#include <linux/sched/task.h>
 #include <linux/security.h>
 #include <linux/sort.h>
 #include <soc/qcom/boot_stats.h>
@@ -46,7 +47,7 @@
 #endif
 
 #if defined(CONFIG_ARM64) || defined(CONFIG_ARM_LPAE)
-#define KGSL_DMA_BIT_MASK	DMA_BIT_MASK(64)
+#define KGSL_DMA_BIT_MASK	(~0ULL)
 #else
 #define KGSL_DMA_BIT_MASK	DMA_BIT_MASK(32)
 #endif
@@ -4411,7 +4412,7 @@ static struct kobj_type kgsl_gpu_sysfs_ktype = {
 
 static int _register_device(struct kgsl_device *device)
 {
-	static u64 dma_mask = DMA_BIT_MASK(64);
+	static u64 dma_mask = ~0ULL;
 	static struct device_dma_parameters dma_parms;
 	int minor, ret;
 	dev_t dev;
@@ -4451,7 +4452,7 @@ static int _register_device(struct kgsl_device *device)
 	device->dev->dma_mask = &dma_mask;
 	device->dev->dma_parms = &dma_parms;
 
-	dma_set_max_seg_size(device->dev, DMA_BIT_MASK(32));
+	dma_set_max_seg_size(device->dev, (unsigned int)DMA_BIT_MASK(32));
 
 	set_dma_ops(device->dev, NULL);
 
@@ -4553,7 +4554,7 @@ int kgsl_device_platform_probe(struct kgsl_device *device)
 		goto error_pwrctrl_close;
 	}
 
-	sched_set_fifo(device->events_worker->task);
+	sched_setscheduler_nocheck(device->events_worker->task, SCHED_FIFO, &param);
 
 	/* This can return -EPROBE_DEFER */
 	status = kgsl_mmu_probe(device);
@@ -4591,8 +4592,6 @@ error:
 void kgsl_device_platform_remove(struct kgsl_device *device)
 {
 	kthread_destroy_worker(device->events_worker);
-
-	kgsl_device_snapshot_close(device);
 
 	idr_destroy(&device->context_idr);
 	idr_destroy(&device->timelines);

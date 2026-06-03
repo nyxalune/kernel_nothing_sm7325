@@ -285,4 +285,7 @@ struct kgsl_process_private;
 void kgsl_snapshot_push_object(struct kgsl_device *device,
 		struct kgsl_process_private *process,
 		uint64_t gpuaddr, uint64_t dwords);
+
+void kgsl_device_snapshot_close(struct kgsl_device *device);
+
 #endif
