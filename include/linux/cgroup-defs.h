@@ -464,6 +464,12 @@ struct cgroup {
 	struct cgroup_rstat_cpu __percpu *rstat_cpu;
 	struct list_head rstat_css_list;
 
+	/*
+	 * PI: Subsys-unique ID.  0 is unused and root is always 1.  The
+	 * matching css can be looked up using css_from_id().
+	 */
+	int id;
+
 	/* cgroup basic resource statistics */
 	struct cgroup_base_stat last_bstat;
 	struct cgroup_base_stat bstat;
@@ -517,6 +523,9 @@ struct cgroup_root {
 
 	/* for cgrp->ancestor_ids[0] */
 	u64 cgrp_ancestor_id_storage;
+
+	/* idr for cgroup->id allocation */
+	struct idr cgroup_idr;
 
 	/* Number of cgroups in the hierarchy, used only for /proc/cgroups */
 	atomic_t nr_cgrps;
