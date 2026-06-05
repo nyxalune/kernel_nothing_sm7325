@@ -197,7 +197,7 @@ static void cpuidle_idle_call(void)
 				    true : false;
 			cpumask_clear_cpu(dev->cpu, &cpu_state);
 			if (print_wake_irq)
-				gic_s2idle_wake();
+				s2idle_wake();
 #endif /* CONFIG_QGKI_SHOW_S2IDLE_WAKE_IRQ */
 
 			if (entered_state > 0) {

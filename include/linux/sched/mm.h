@@ -80,12 +80,7 @@ static inline bool mmget_still_valid(struct mm_struct *mm)
  * RCU callback for delayed mm drop. Not strictly RCU, but call_rcu() is
  * by far the least expensive way to do that.
  */
-static inline void __mmdrop_delayed(struct rcu_head *rhp)
-{
-	struct mm_struct *mm = container_of(rhp, struct mm_struct, delayed_drop);
-
-	__mmdrop(mm);
-}
+extern void __mmdrop_delayed(struct rcu_head *rhp);
 
 /*
  * Invoked from finish_task_switch(). Delegates the heavy lifting on RT

@@ -262,13 +262,11 @@ static void rcu_dump_cpu_stacks(void)
 
 static void print_cpu_stall_fast_no_hz(char *cp, int cpu)
 {
-	struct rcu_data *rdp = &per_cpu(rcu_data, cpu);
+	struct rcu_data *rdp = per_cpu_ptr(&rcu_data, cpu);
 
-	sprintf(cp, "last_accelerate: %04lx/%04lx, Nonlazy posted: %c%c%c",
+	sprintf(cp, "last_accelerate: %04lx/%04lx dyntick_enabled: %d",
 		rdp->last_accelerate & 0xffff, jiffies & 0xffff,
-		".l"[rdp->all_lazy],
-		".L"[!rcu_segcblist_n_nonlazy_cbs(&rdp->cblist)],
-		".D"[!!rdp->tick_nohz_enabled_snap]);
+		!!rdp->tick_nohz_enabled_snap);
 }
 
 #else /* #ifdef CONFIG_RCU_FAST_NO_HZ */
@@ -279,6 +277,38 @@ static void print_cpu_stall_fast_no_hz(char *cp, int cpu)
 }
 
 #endif /* #else #ifdef CONFIG_RCU_FAST_NO_HZ */
+
+static const char * const gp_state_names[] = {
+	[RCU_GP_IDLE] = "RCU_GP_IDLE",
+	[RCU_GP_WAIT_GPS] = "RCU_GP_WAIT_GPS",
+	[RCU_GP_DONE_GPS] = "RCU_GP_DONE_GPS",
+	[RCU_GP_ONOFF] = "RCU_GP_ONOFF",
+	[RCU_GP_INIT] = "RCU_GP_INIT",
+	[RCU_GP_WAIT_FQS] = "RCU_GP_WAIT_FQS",
+	[RCU_GP_DOING_FQS] = "RCU_GP_DOING_FQS",
+	[RCU_GP_CLEANUP] = "RCU_GP_CLEANUP",
+	[RCU_GP_CLEANED] = "RCU_GP_CLEANED",
+};
+
+/*
+ * Convert a ->gp_state value to a character string.
+ */
+static const char *gp_state_getname(short gs)
+{
+	if (gs < 0 || gs >= ARRAY_SIZE(gp_state_names))
+		return "???";
+	return gp_state_names[gs];
+}
+
+/* Is the RCU grace-period kthread being starved of CPU time? */
+static bool rcu_is_gp_kthread_starving(unsigned long *jp)
+{
+	unsigned long j = jiffies - READ_ONCE(rcu_state.gp_activity);
+
+	if (jp)
+		*jp = j;
+	return j > 2 * HZ;
+}
 
 /*
  * Print out diagnostic information for the specified stalled CPU.
